@@ -6,14 +6,34 @@ const showSelectedButton = document.getElementById('show-selected');
 const urlParameters =  {
     'page': 1,
 }
-function addItemToModal(){
-    
-}
+const modalItems = [];
+document.addEventListener('click',(event)=>{
+    let target = event.target;
+    if(target.tagName != 'INPUT') return;
+
+    addElementToTheModal(target);
+});
 loadMoreButton.addEventListener('click', ()=>{
     increasePageNumber(urlParameters, urlParameters['page']+1);
     renderLoadedData();
 });
-
+function addElementToTheModal(target){
+    let row = target.closest('tr').cloneNode(true);
+    if(modalItems.length < 1) {
+        modalItems.push(row.id);
+        tableBodyModal.appendChild(row);
+    } else {
+        let status = false;
+        modalItems.map((item)=>{
+            if(item === row.id) status = true;
+        })
+    if(!status){
+        modalItems.push(row.id);
+        tableBodyModal.appendChild(row);
+        }
+    }
+    
+}
 function getData(url, urlParameters){
     url += urlParameters.page;
 
