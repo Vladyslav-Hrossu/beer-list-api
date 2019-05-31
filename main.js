@@ -6,34 +6,77 @@ const showSelectedButton = document.getElementById('show-selected');
 const urlParameters =  {
     'page': 1,
 }
-const modalItems = [];
-document.addEventListener('click',(event)=>{
-    let target = event.target;
-    if(target.tagName != 'INPUT') return;
+loadMoreButton.addEventListener('click', loadMoreData);
 
-    addElementToTheModal(target);
-});
-loadMoreButton.addEventListener('click', ()=>{
-    increasePageNumber(urlParameters, urlParameters['page']+1);
-    renderLoadedData();
-});
-function addElementToTheModal(target){
-    let row = target.closest('tr').cloneNode(true);
-    if(modalItems.length < 1) {
-        modalItems.push(row.id);
-        tableBodyModal.appendChild(row);
-    } else {
-        let status = false;
-        modalItems.map((item)=>{
-            if(item === row.id) status = true;
-        })
-    if(!status){
-        modalItems.push(row.id);
-        tableBodyModal.appendChild(row);
-        }
+class listElement {
+    constructor(data){
+        this.data = data;
+        this.id = data['id'];
+        this.name = data['name'];
+        this.abv = data['abv'];
+        this.imageUrl = data['image_url'];
     }
-    
+    render(){
+        const parent = document.createElement('tr');
+        parent.setAttribute('id', this.id);
+        const children = [];
+
+        for(let i = 0; i < 5; i++){
+            const td = createElement('td','column');
+            parent.appendChild(td);
+            children.push(td);            
+        }
+
+        for(let i = 0; i < children.length; i++){
+            switch(i){
+                case 0:
+                    children[i].textContent = this.id;
+                    children[i].classList.add('number');
+
+                    break;
+                case 1:
+                    const img = document.createElement('img');
+                    img.setAttribute('src', this.imageUrl);
+                    children[i].classList.add('image');
+                    children[i].appendChild(img);                    
+
+                    break;
+                case 2:
+                    children[i].textContent = this.name;
+                    children[i].classList.add('name');
+
+                    break;
+                case 3:
+                    children[i].textContent = this.abv;
+                    children[i].classList.add('abv')
+                    
+                    break;
+
+                case 4:
+                    const input = document.createElement('input');
+                    input.setAttribute('type', 'checkbox');
+                    children[i].appendChild(input);
+                    children[i].classList.add('check');
+
+                    break;
+
+
+            }
+
+        }
+        tableBody.appendChild(parent);
+    }
 }
+
+
+function createElement(tagName, elementClass){
+    const newElement = document.createElement(tagName);
+    newElement.classList.add(elementClass);
+    return newElement;
+}
+
+
+
 function getData(url, urlParameters){
     url += urlParameters.page;
 
@@ -50,42 +93,6 @@ function getData(url, urlParameters){
         });
     });
 }
-function createCell(text, elementClass){
-    const newCell = document.createElement('td');
-    newCell.textContent = text;
-    newCell.classList.add(elementClass);
-    return newCell;
-}
-function createImage(url, elementClass){
-    const newCell = document.createElement('td');
-    const newImage = document.createElement('img');
-    newImage.setAttribute('src', url);
-    newImage.setAttribute('height', '75');
-    newImage.setAttribute('width', '25');
-    newCell.classList.add(elementClass);
-    newCell.appendChild(newImage);
-    return newCell;
-}
-function createRow(id){
-    const newElement = document.createElement('tr');
-    newElement.setAttribute('id', id);
-    newElement.classList.add("text-center");
-    return newElement;
-}
-function createCheckBox(elementClass){
-    const newCell = document.createElement('td');
-    const newCheckbox = document.createElement('input');
-    newCheckbox.setAttribute('type', 'checkbox');
-    newCheckbox.setAttribute('name', 'select');
-    newCell.classList.add(elementClass);
-    newCell.appendChild(newCheckbox);
-    return newCell;
-}
-function increasePageNumber(urlParameters, pageNumber){
-    if(pageNumber > urlParameters['page']){
-        urlParameters['page'] = pageNumber;
-    }
-}
 
 function renderLoadedData(){
     const elementList = [];
@@ -93,22 +100,42 @@ function renderLoadedData(){
         .then(
             data =>{
                 data.forEach((element)=>{
-                    elementList.push(element);
+                    elementList.push(new listElement(element));
                 });
-            }
-        )
+            })
         .then(
             ()=>{
-        elementList.forEach((element)=>{
-            let {id, name, abv, image_url} = element;
-            let row = createRow(id);
-            row.appendChild(createCell(id, 'number'));
-            row.appendChild(createImage(image_url, 'icon'));
-            row.appendChild(createCell(name, 'name'));
-            row.appendChild(createCell(abv, 'abv'));
-            row.appendChild(createCheckBox('check'));
-            tableBody.appendChild(row);
-        });
-            })
+                elementList.map(element=>{
+                    element.render();
+                })
+            });
 }
+
+function increasePageNumber(urlParameters, pageNumber){
+    if(pageNumber > urlParameters['page']){
+        urlParameters['page'] = pageNumber;
+    }
+}
+
+function loadMoreData(){
+
+    increasePageNumber(urlParameters, urlParameters['page']+1);
+
+    const elementList = [];
+    getData('https://api.punkapi.com/v2/beers?per_page=8&page=', urlParameters)
+        .then(
+            data =>{
+                data.forEach((element)=>{
+                    elementList.push(new listElement(element));
+                });
+            })
+        .then(
+            ()=>{
+                elementList.map(element=>{
+                    element.render();
+                })
+            });
+}
+console.log(urlParameters.page);
 renderLoadedData();
+console.log(urlParameters.page);

@@ -4,3 +4,7 @@ body{
 input:hover{
     cursor: pointer;
 }
+img{
+    height: 75px;
+    width: 25px;
+}
