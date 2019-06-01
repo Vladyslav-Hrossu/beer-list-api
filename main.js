@@ -3,10 +3,24 @@ const tableBodyModal = document.getElementById('beer-table-modal');
 const getStartedButton = document.getElementById('get-started');
 const loadMoreButton = document.getElementById('load-more');
 const showSelectedButton = document.getElementById('show-selected');
+const modalWindow =  document.getElementById("myModal");
+const closeButton = document.getElementById("close");
+const sortIdButton = document.getElementById("id-sort-button");
+const sortAbvButton = document.getElementById("abv-sort-button");
+const sortNameButton = document.getElementById("name-sort-button");
 const urlParameters =  {
     'page': 1,
+    'sorted': 'id'
 }
+const renderedElements = [];
+
 loadMoreButton.addEventListener('click', loadMoreData);
+showSelectedButton.addEventListener('click', ()=> modalWindow.style.display = "block");
+closeButton.addEventListener('click', ()=> modalWindow.style.display = "none");
+sortIdButton.addEventListener('click', sortId);
+sortAbvButton.addEventListener('click', sortAbv);
+sortNameButton.addEventListener('click', sortName);
+renderLoadedData();
 
 class listElement {
     constructor(data){
@@ -17,9 +31,10 @@ class listElement {
         this.imageUrl = data['image_url'];
     }
     render(){
-        const parent = document.createElement('tr');
-        parent.setAttribute('id', this.id);
+        const parent = createElement('tr', 'data-row');
         const children = [];
+        
+        parent.setAttribute('id', this.id);
 
         for(let i = 0; i < 5; i++){
             const td = createElement('td','column');
@@ -64,6 +79,7 @@ class listElement {
             }
 
         }
+
         tableBody.appendChild(parent);
     }
 }
@@ -71,8 +87,15 @@ class listElement {
 
 function createElement(tagName, elementClass){
     const newElement = document.createElement(tagName);
+
     newElement.classList.add(elementClass);
     return newElement;
+}
+
+function increasePageNumber(urlParameters, pageNumber){
+    if(pageNumber > urlParameters['page']){
+        urlParameters['page'] = pageNumber;
+    }
 }
 
 
@@ -85,6 +108,7 @@ function getData(url, urlParameters){
         xhr.open('GET', url, true);
         xhr.send();
         xhr.addEventListener("load", function() {
+
             if (xhr.status != 400){
                 resolve(JSON.parse(xhr.responseText));
             } else {
@@ -96,37 +120,33 @@ function getData(url, urlParameters){
 
 function renderLoadedData(){
     const elementList = [];
+
     getData('https://api.punkapi.com/v2/beers?per_page=8&page=', urlParameters)
-        .then(
-            data =>{
+        .then(data =>{
                 data.forEach((element)=>{
                     elementList.push(new listElement(element));
+                    renderedElements.push(new listElement(element));
                 });
             })
-        .then(
-            ()=>{
+        .then(()=>{
                 elementList.map(element=>{
                     element.render();
                 })
             });
-}
-
-function increasePageNumber(urlParameters, pageNumber){
-    if(pageNumber > urlParameters['page']){
-        urlParameters['page'] = pageNumber;
-    }
 }
 
 function loadMoreData(){
 
-    increasePageNumber(urlParameters, urlParameters['page']+1);
+    increasePageNumber(urlParameters, urlParameters['page']++);
 
     const elementList = [];
+
     getData('https://api.punkapi.com/v2/beers?per_page=8&page=', urlParameters)
         .then(
             data =>{
                 data.forEach((element)=>{
                     elementList.push(new listElement(element));
+                    renderedElements.push(new listElement(element));
                 });
             })
         .then(
@@ -136,6 +156,33 @@ function loadMoreData(){
                 })
             });
 }
-console.log(urlParameters.page);
-renderLoadedData();
-console.log(urlParameters.page);
+
+function sortAbv(){
+    renderedElements.sort((a, b)=>{
+        return a.abv - b.abv;
+    })
+    tableBody.innerHTML = null;
+    renderedElements.forEach((element)=>{
+        element.render();
+    })
+}
+
+function sortId(){
+    renderedElements.sort((a, b)=>{
+        return a.id - b.id;
+    })
+    tableBody.innerHTML = null;
+    renderedElements.forEach((element)=>{
+        element.render();
+    })
+}
+
+function sortName(){
+    renderedElements.sort((a,b)=>{
+        if(a.name < b.name) return -1;
+    });
+    tableBody.innerHTML = null;
+    renderedElements.forEach((element)=>{
+        element.render();
+    })
+}
