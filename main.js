@@ -11,7 +11,10 @@ const sortNameButton = document.getElementById("name-sort-button");
 const urlParameters =  {
     'page': 1,
     'sorted': 'id'
-}
+};
+const sortingParameters = {
+    'sorted': 'id',
+};
 const renderedElements = [];
 
 loadMoreButton.addEventListener('click', loadMoreData);
@@ -116,17 +119,14 @@ function getData(url, urlParameters){
 }
 
 function renderLoadedData(){
-    const elementList = [];
-
     getData('https://api.punkapi.com/v2/beers?per_page=8&page=', urlParameters)
         .then(data =>{
                 data.forEach((element)=>{
-                    elementList.push(new listElement(element));
                     renderedElements.push(new listElement(element));
                 });
             })
         .then(()=>{
-                elementList.map(element=>{
+            renderedElements.map(element=>{
                     element.render();
                 })
             });
@@ -135,27 +135,20 @@ function renderLoadedData(){
 function loadMoreData(){
 
     increasePageNumber(urlParameters, urlParameters['page']++);
-
-    const elementList = [];
-
     getData('https://api.punkapi.com/v2/beers?per_page=8&page=', urlParameters)
         .then(
             data =>{
                 data.forEach((element)=>{
-                    // elementList.push(new listElement(element));
                     renderedElements.push(new listElement(element));
                 });
             })
         .then(
             ()=>{
-                renderedElements.map(element=>{
-                    element.render();
-                })
-                sort(urlParameters.sorted);
+                sort(sortingParameters.sorted);
             });
 }
 
-function sort(parameter){
+function sort(parameter, direction){
     if(parameter === 'name'){
         renderedElements.sort((a,b)=>{
 
