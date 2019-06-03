@@ -8,6 +8,9 @@ const closeButton = document.getElementById('close');
 const sortIdButton = document.getElementById('id-sort-button');
 const sortAbvButton = document.getElementById('abv-sort-button');
 const sortNameButton = document.getElementById('name-sort-button');
+const registerWindow = document.getElementById('modalRegister');
+const closeGetStarted = document.getElementById('close-email');
+const registrationConfirmButton = document.getElementById('registration-confirm-button');
 const urlParameters =  {
     'page': 1
 };
@@ -20,8 +23,15 @@ const sortingParameters = {
 const listElements = [];
 const renderedElements = [];
 const modalElements = [];
-
-
+registrationConfirmButton.addEventListener('click',validateForm);
+getStartedButton.addEventListener('click', ()=>{
+    registerWindow.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+});
+closeGetStarted.addEventListener('click', ()=>{
+    registerWindow.style.display = 'none';
+    document.body.style.overflow = 'visible';
+});
 loadMoreButton.addEventListener('click', loadMoreData);
 showSelectedButton.addEventListener('click', ()=> {
     modalWindow.style.display = 'block';
@@ -283,4 +293,18 @@ function renderModalTablet(){
     modalElements.forEach(element=>{
         element.renderInModal();
     })
+}
+
+function validateEmail(email) {
+    var re  = /\S+@\S+\.\S+/;
+    return re.test(String(email).toLowerCase());
+}
+function validateForm(event){
+    const emailForm = document.getElementById('email-input');
+    const passwordForm = document.getElementById('password-input');
+    const passwordRepeatForm = document.getElementById('password-input-repeat');
+    
+    if(!validateEmail(emailForm.value)&&!(passwordForm === passwordRepeatForm)){
+            event.preventDefault();
+    }
 }

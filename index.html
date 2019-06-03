@@ -46,6 +46,32 @@
       </div>
   </div>
 
+    <div class="modal-window-register" id="modalRegister">
+        <form>
+            <div class="register-container">
+                <h1>Register</h1>
+                <p>Please fill in this form to create an account.</p>
+                <hr>
+    
+                <label for="email"><b>Email</b></label>
+                <input id="email-input" type="text" placeholder="Enter Email" name="email" required>
+                <br>
+    
+                <label for="psw"><b>Password</b></label>
+                <input id="password-input" type="password" placeholder="Enter Password" name="psw" required>
+                <br>
+
+                <label for="psw-repeat"><b>Repeat Password</b></label>
+                <input id="password-input-repeat" type="password" placeholder="Repeat Password" name="pswrep" required>
+                <hr>
+                <div class="btn-group col-12" role="group" aria-label="Basic example">
+                    <button type="submit" id="registration-confirm-button" class="btn btn-success">Register</button>
+                    <button type="button" id="close-email" class="btn btn-secondary">Close</button>
+                </div>
+                
+            </div>
+        </form>
+    </div>
 <script src="main.js"></script>
 </body>
 </html>
