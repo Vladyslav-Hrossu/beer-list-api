@@ -8,6 +8,9 @@ img{
     height: 75px;
     width: 25px;
 }
+.sort-button{
+    cursor: pointer;
+}
 .modal-window {
     display: none;
     position: fixed;

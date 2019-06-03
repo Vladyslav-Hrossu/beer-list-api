@@ -17,9 +17,9 @@ const renderedElements = [];
 loadMoreButton.addEventListener('click', loadMoreData);
 showSelectedButton.addEventListener('click', ()=> modalWindow.style.display = "block");
 closeButton.addEventListener('click', ()=> modalWindow.style.display = "none");
-sortIdButton.addEventListener('click', sortId);
-sortAbvButton.addEventListener('click', sortAbv);
-sortNameButton.addEventListener('click', sortName);
+sortIdButton.addEventListener('click', () => sort('id'));
+sortAbvButton.addEventListener('click', () => sort('abv'));
+sortNameButton.addEventListener('click', () => sort('name'));
 renderLoadedData();
 
 class listElement {
@@ -84,7 +84,6 @@ class listElement {
     }
 }
 
-
 function createElement(tagName, elementClass){
     const newElement = document.createElement(tagName);
 
@@ -97,8 +96,6 @@ function increasePageNumber(urlParameters, pageNumber){
         urlParameters['page'] = pageNumber;
     }
 }
-
-
 
 function getData(url, urlParameters){
     url += urlParameters.page;
@@ -145,43 +142,34 @@ function loadMoreData(){
         .then(
             data =>{
                 data.forEach((element)=>{
-                    elementList.push(new listElement(element));
+                    // elementList.push(new listElement(element));
                     renderedElements.push(new listElement(element));
                 });
             })
         .then(
             ()=>{
-                elementList.map(element=>{
+                renderedElements.map(element=>{
                     element.render();
                 })
+                sort(urlParameters.sorted);
             });
 }
 
-function sortAbv(){
-    renderedElements.sort((a, b)=>{
-        return a.abv - b.abv;
-    })
-    tableBody.innerHTML = null;
-    renderedElements.forEach((element)=>{
-        element.render();
-    })
-}
+function sort(parameter){
+    if(parameter === 'name'){
+        renderedElements.sort((a,b)=>{
 
-function sortId(){
-    renderedElements.sort((a, b)=>{
-        return a.id - b.id;
-    })
-    tableBody.innerHTML = null;
-    renderedElements.forEach((element)=>{
-        element.render();
-    })
-}
+            if(a.name < b.name) return -1;
+        });
 
-function sortName(){
-    renderedElements.sort((a,b)=>{
-        if(a.name < b.name) return -1;
-    });
-    tableBody.innerHTML = null;
+    } else {
+        renderedElements.sort((a, b)=>{
+
+            return a[parameter] - b[parameter];
+        })
+    }
+    urlParameters.sorted = parameter;
+    tableBody.innerHTML = null;    
     renderedElements.forEach((element)=>{
         element.render();
     })
