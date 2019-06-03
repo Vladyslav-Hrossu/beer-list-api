@@ -10,6 +10,11 @@ img{
 }
 .sort-button{
     cursor: pointer;
+    user-select: none;
+}
+.sort-button:hover {
+    transition: all 0.5s ease;
+    background-color: #ddd !important;
 }
 .modal-window {
     display: none;

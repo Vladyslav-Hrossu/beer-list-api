@@ -30,18 +30,17 @@
 
 
   <div class="modal-window" id="myModal">
-      <div class="row container-fluid modal-content">
+      <div class="row modal-content">
           <table  class="table table-striped table-bordered">
               <thead class="thead-light text-center">
                   <tr>
-                      <th scope="col">#</td>
+                      <th scope="col" class="sort-button" id="id-sort-button-modal">#</td>
                       <th scope="col">Image</td>
-                      <th scope="col">Name</td>
-                      <th scope="col" >Alcohol</td>
-                      <th scope="col">Select</td>
+                      <th scope="col" class="sort-button" id="name-sort-button-modal">Name</td>
+                      <th scope="col" class="sort-button" id="abv-sort-button-modal">Alcohol</td>
                   </tr>
               </thead>
-              <tbody id="beer-table"></tbody>
+              <tbody id="beer-table-modal"></tbody>
           </table>
           <button type="button" id="close" class="btn btn-secondary">Close</button>
       </div>

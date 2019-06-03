@@ -3,26 +3,48 @@ const tableBodyModal = document.getElementById('beer-table-modal');
 const getStartedButton = document.getElementById('get-started');
 const loadMoreButton = document.getElementById('load-more');
 const showSelectedButton = document.getElementById('show-selected');
-const modalWindow =  document.getElementById("myModal");
-const closeButton = document.getElementById("close");
-const sortIdButton = document.getElementById("id-sort-button");
-const sortAbvButton = document.getElementById("abv-sort-button");
-const sortNameButton = document.getElementById("name-sort-button");
+const modalWindow =  document.getElementById('myModal');
+const closeButton = document.getElementById('close');
+const sortIdButton = document.getElementById('id-sort-button');
+const sortAbvButton = document.getElementById('abv-sort-button');
+const sortNameButton = document.getElementById('name-sort-button');
 const urlParameters =  {
-    'page': 1,
-    'sorted': 'id'
+    'page': 1
 };
 const sortingParameters = {
     'sorted': 'id',
+    'nameDirection': false,
+    'abvDirection': false,
+    'idDirection': true
 };
+const listElements = [];
 const renderedElements = [];
+const modalElements = [];
+
 
 loadMoreButton.addEventListener('click', loadMoreData);
-showSelectedButton.addEventListener('click', ()=> modalWindow.style.display = "block");
-closeButton.addEventListener('click', ()=> modalWindow.style.display = "none");
-sortIdButton.addEventListener('click', () => sort('id'));
-sortAbvButton.addEventListener('click', () => sort('abv'));
-sortNameButton.addEventListener('click', () => sort('name'));
+showSelectedButton.addEventListener('click', ()=> {
+    modalWindow.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    renderModalTablet();
+});
+closeButton.addEventListener('click', () =>{
+    modalWindow.style.display = 'none';
+    document.body.style.overflow = 'visible';
+});
+sortIdButton.addEventListener('click', () => {
+    sortingParameters['idDirection'] = !sortingParameters['idDirection'];
+    sort('id', sortingParameters['idDirection'], renderedElements);
+});
+sortAbvButton.addEventListener('click', () => {
+    sortingParameters['abvDirection'] = !sortingParameters['abvDirection'];
+    sort('abv', sortingParameters['abvDirection'], renderedElements);
+});
+sortNameButton.addEventListener('click', () => {
+    sortingParameters['nameDirection'] = !sortingParameters['nameDirection'];
+    sort('name', sortingParameters['nameDirection'], renderedElements);
+});
+tableBody.addEventListener('click', createModal);
 renderLoadedData();
 
 class listElement {
@@ -85,6 +107,48 @@ class listElement {
 
         tableBody.appendChild(parent);
     }
+    renderInModal(){
+        const parent = createElement('tr', 'data-row');
+        const children = [];
+        
+        parent.setAttribute('id', this.id);
+
+        for(let i = 0; i < 4; i++){
+            const td = createElement('td','column');
+            parent.appendChild(td);
+            children.push(td);            
+        }
+
+        for(let i = 0; i < children.length; i++){
+            switch(i){
+                case 0:
+                    children[i].textContent = this.id;
+                    children[i].classList.add('number');
+
+                    break;
+                case 1:
+                    const img = document.createElement('img');
+                    img.setAttribute('src', this.imageUrl);
+                    children[i].classList.add('image');
+                    children[i].appendChild(img);                    
+
+                    break;
+                case 2:
+                    children[i].textContent = this.name;
+                    children[i].classList.add('name');
+
+                    break;
+                case 3:
+                    children[i].textContent = this.abv;
+                    children[i].classList.add('abv')
+                    
+                    break;
+            }
+
+        }
+
+        tableBodyModal.appendChild(parent);
+    }
 }
 
 function createElement(tagName, elementClass){
@@ -123,6 +187,7 @@ function renderLoadedData(){
         .then(data =>{
                 data.forEach((element)=>{
                     renderedElements.push(new listElement(element));
+                    listElements.push(new listElement(element));
                 });
             })
         .then(()=>{
@@ -140,30 +205,82 @@ function loadMoreData(){
             data =>{
                 data.forEach((element)=>{
                     renderedElements.push(new listElement(element));
+                    listElements.push(new listElement(element));
                 });
             })
         .then(
             ()=>{
-                sort(sortingParameters.sorted);
+                sort(sortingParameters.sorted, sortingParameters[`${sortingParameters.sorted}Direction`], renderedElements);
             });
 }
 
-function sort(parameter, direction){
-    if(parameter === 'name'){
-        renderedElements.sort((a,b)=>{
-
-            if(a.name < b.name) return -1;
-        });
-
-    } else {
-        renderedElements.sort((a, b)=>{
-
-            return a[parameter] - b[parameter];
-        })
+function sort(parameter, direction, list){
+    switch (parameter) {
+        case 'name':
+            if(direction){
+                list.sort((a,b)=>{        
+                    if(a.name < b.name) return -1;
+                });
+            } else {
+                list.sort((a,b)=>{
+        
+                    if(a.name > b.name) return -1;
+                });
+            }
+            break;    
+        case 'abv':
+            if(direction){
+                list.sort((a, b)=>{
+        
+                    return a[parameter] - b[parameter];
+                });
+            } else {
+                list.sort((a, b)=>{
+    
+                    return b[parameter] - a[parameter];
+                });
+            }
+            break;
+        case 'id':
+            if(direction){
+                list.sort((a, b)=>{
+        
+                    return a[parameter] - b[parameter];
+                });
+            } else {
+                list.sort((a, b)=>{
+    
+                    return b[parameter] - a[parameter];
+                });
+            }
+            break;
     }
-    urlParameters.sorted = parameter;
-    tableBody.innerHTML = null;    
-    renderedElements.forEach((element)=>{
+    sortingParameters.sorted = parameter;
+    tableBody.innerHTML = null;
+    modalElements.splice(0);
+    list.forEach((element)=>{
         element.render();
+    })
+}
+
+function createModal(event){
+    const target = event.target;
+    if(target.tagName != 'INPUT') return;
+    if(target.checked === true){
+        modalElements.push(listElements[target.closest('tr').id -1]);
+    };
+    if(target.checked === false){
+        for(let i = 0; i < modalElements.length; i++){
+            if(+target.closest('tr').id === modalElements[i].id){
+                modalElements.splice(i,1);
+            }
+        }
+    };
+}
+
+function renderModalTablet(){
+    tableBodyModal.innerHTML = null;
+    modalElements.forEach(element=>{
+        element.renderInModal();
     })
 }
